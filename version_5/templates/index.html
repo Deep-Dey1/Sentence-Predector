@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentence Autocompleter</title>
+  <style>
+    #suggestions {
+      margin-top: 10px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sentence Autocompleter</h1>
+  <textarea id="input" rows="4" cols="50" placeholder="Start typing..."></textarea>
+  <div id="suggestions"></div>
+
+  <script>
+    const input = document.getElementById('input');
+    const suggestionsDiv = document.getElementById('suggestions');
+
+    input.addEventListener('input', async (e) => {
+      const text = e.target.value;
+      if (text.length > 0) {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        const data = await response.json();
+        suggestionsDiv.innerHTML = data.predictions.join('<br>');
+      } else {
+        suggestionsDiv.innerHTML = '';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Sentence Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Real-time Sentence Prediction</h1>
+        <input type="text" id="user-input" placeholder="Start typing..." oninput="getSuggestions()">
+        <div id="predictions"></div>
+    </div>
+
+    <script>
+        async function getSuggestions() {
+            const userInput = document.getElementById('user-input').value;
+            if (userInput.length > 0) {
+                try {
+                    const response = await fetch('/predict', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ prompt: userInput })
+                    });
+                    const data = await response.json();
+
+                    if (data.error) {
+                        // Display error message
+                        displayPredictions([data.error]);
+                    } else {
+                        // Display predictions
+                        displayPredictions(data.predictions);
+                    }
+                } catch (error) {
+                    console.error('Error fetching predictions:', error);
+                    displayPredictions(['An error occurred. Please try again.']);
+                }
+            }
+        }
+
+        function displayPredictions(predictions) {
+            const predictionsDiv = document.getElementById('predictions');
+            predictionsDiv.innerHTML = ''; // Clear previous predictions
+
+            if (predictions && predictions.length > 0) {
+                predictions.forEach(prediction => {
+                    const predictionElement = document.createElement('p');
+                    predictionElement.innerText = prediction;
+                    predictionsDiv.appendChild(predictionElement);
+                });
+            } else {
+                // Display a message if no predictions are available
+                const noPredictionsElement = document.createElement('p');
+                noPredictionsElement.innerText = 'No predictions available.';
+                predictionsDiv.appendChild(noPredictionsElement);
+            }
+        }
+    </script>
+</body>
+</html>
